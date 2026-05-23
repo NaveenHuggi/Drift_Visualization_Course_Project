@@ -24,15 +24,23 @@ When deploying machine learning models, especially deep learning models, they ma
 - **Interpretability & Visualization:**
   - Integrates the `grad-cam` library to generate heatmaps.
   - Compares 8 state-of-the-art CAM algorithms:
-    1. GradCAM
-    2. HiResCAM
-    3. ScoreCAM
-    4. GradCAM++
-    5. AblationCAM
-    6. XGradCAM
-    7. EigenCAM
-    8. FullGrad
+    1. **GradCAM**: Uses the gradients of the target concept flowing into the final convolutional layer to produce a coarse localization map highlighting important regions in the image.
+    2. **HiResCAM**: Similar to GradCAM but calculates the weights differently, preserving higher resolution spatial details and preventing cross-talk between different features.
+    3. **ScoreCAM**: A gradient-free visual explanation method that uses the increase in confidence score when passing a mask multiplied with the input image to determine weight, making it less noisy.
+    4. **GradCAM++**: An extension of GradCAM that uses second-order gradients to provide better localization of objects, especially when there are multiple occurrences of the same class in an image.
+    5. **AblationCAM**: A gradient-free method that systematically ablates (zeroes out) individual feature map channels to measure their impact on the final prediction, often resulting in cleaner heatmaps.
+    6. **XGradCAM**: An improvement over GradCAM that seeks to achieve better theoretical grounding and faithfulness to the model by adjusting the gradient weights using normalized feature maps.
+    7. **EigenCAM**: Computes the principal components (eigenvectors) of the feature maps, focusing on the most dominant patterns learned by the network without relying on class-specific gradients or backpropagation.
+    8. **FullGrad**: Aggregates the gradients of the biases from all convolutional layers in addition to the input image gradients, capturing both local and global importance across the entire network.
   - Outputs a 3x3 grid visualizing how each algorithm interprets the model's focus on the input image.
+
+## Example on Cancer Datasets
+
+To demonstrate that the drift visualization and CAM techniques are widely applicable across different domains, here is an example of the methodology applied to a cancer-based dataset (e.g., Melanoma detection):
+
+![Cancer Dataset Example](image.png)
+
+This proves the utility of these interpretability methods beyond simple datasets (like MNIST/SVHN) and highlights their effectiveness on complex medical imaging tasks.
 
 ## Requirements
 
