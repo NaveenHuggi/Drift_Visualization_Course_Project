@@ -42,6 +42,42 @@ To demonstrate that the drift visualization and CAM techniques are widely applic
 
 This proves the utility of these interpretability methods beyond simple datasets (like MNIST/SVHN) and highlights their effectiveness on complex medical imaging tasks.
 
+## Ablation Study
+
+An ablation study is a methodology used in deep learning to understand the contribution of individual components (such as layers, features, or modules) to the overall performance of a model. By systematically removing or disabling these parts, we can measure how the model's accuracy, robustness, or interpretability is affected.
+
+In the context of this repository, an ablation study evaluates the resilience and reliability of our interpretability pipeline when faced with model or data alterations.
+
+**Key Ablation Experiments for this Pipeline:**
+
+1. **Layer-wise Ablation (Model Depth):**
+   - *Experiment:* Extract Class Activation Maps from earlier convolutional layers rather than just the final layer (e.g., `layer4[-1]` in ResNet-18).
+   - *Insight:* Earlier layers typically capture low-level features (edges, textures), while deeper layers capture high-level semantics (shapes, lesions). This ablation helps visualize at what depth the network begins to recognize the target class.
+
+2. **Feature Map Ablation (AblationCAM):**
+   - *Experiment:* Methodically zero out (ablate) individual feature map channels in the final convolutional layer and observe the drop in prediction confidence.
+   - *Insight:* This is the core concept behind **AblationCAM**. It provides a gradient-free way to find the most "important" features. If ablating a specific channel causes a massive drop in confidence, that channel is highly discriminative.
+
+3. **Data Degradation & Noise (Simulating Drift):**
+   - *Experiment:* Gradually apply Gaussian noise, blur, or color shifts to the input images (e.g., transitioning from clear MNIST digits to noisy, out-of-distribution SVHN-like images).
+   - *Insight:* By running CAMs on progressively noisier data, you can visually track how the model's focus breaks down. Under severe drift, the heatmaps will scatter, indicating that the model is no longer looking at the correct region (e.g., looking at background artifacts instead of the actual subject).
+
+4. **Classifier Head Ablation:**
+   - *Experiment:* Freeze the feature extractor and replace the fully connected layers, then retrain only the classification head.
+   - *Insight:* Helps isolate whether a drop in performance on a drifted dataset is due to poor feature extraction (conv layers) or poor decision boundaries (linear layers).
+
+Conducting these ablation experiments provides concrete evidence of *why* certain architectural choices are effective and establishes the robustness boundaries of the model under data drift.
+
+### Evaluating the Ablation Results
+
+To ensure the ablation study is rigorously quantified, we recommend tracking the following metrics during the experiments:
+
+- **Localization Drop (Faithfulness):** Measure how much the model's confidence drops when the highlighted CAM region is masked out. A high-quality CAM algorithm should cause a massive drop in confidence when its hottest regions are removed.
+- **Increase in Confidence (Insertion):** Start with a blank image and gradually add back pixels starting from the hottest CAM regions. Track how quickly the model's confidence in the target class increases.
+- **Intersection over Union (IoU):** If bounding box annotations are available (e.g., exact tumor locations), calculate the IoU between the thresholded CAM heatmap and the ground truth bounding box across different noise levels to quantify how drift affects spatial focus.
+
+By combining these quantitative metrics with qualitative visual inspections, the ablation study provides a holistic view of the model's interpretability and stability.
+
 ## Interactive Web Dashboard (app.py)
 
 In addition to the notebook, this repository features a professional **Streamlit Dashboard** (`app.py`) for real-time inference and interpretability on melanoma (skin cancer) datasets. 
